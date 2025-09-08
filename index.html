@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind Mirror</title>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+        font-weight: 600;
+        color: #e2e8f0;
+        text-align: center;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        backdrop-filter: blur(12px);
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .video-container {
+        margin: 20px 0;
+    }
+
+    video {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        background: #000;
+    }
+
+    .controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+
+    button {
+        padding: 10px 26px;
+        font-size: 15px;
+        font-weight: 500;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        color: #fff;
+        letter-spacing: 0.4px;
+    }
+
+    #startBtn {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        box-shadow: 0 3px 8px rgba(37,99,235,0.4);
+    }
+
+    #startBtn:hover {
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        transform: translateY(-2px);
+    }
+
+    #stopBtn {
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        box-shadow: 0 3px 8px rgba(185,28,28,0.4);
+    }
+
+    #stopBtn:hover {
+        background: linear-gradient(135deg, #f87171, #b91c1c);
+        transform: translateY(-2px);
+    }
+</style>
+</head>
+<body>
+    <div class="card">
+        <h1>Mind Mirror</h1>
+
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="stopBtn">Stop</button>
+        </div>
+
+        <div class="video-container">
+            <video id="webcam" autoplay muted></video>
+        </div>
+    </div>
+
+<script>
+let audioCtx, source, delayNode, stream;
+const videoElem = document.getElementById('webcam');
+
+document.getElementById('startBtn').onclick = async () => {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    videoElem.srcObject = stream;
+    videoElem.play();
+
+    source = audioCtx.createMediaStreamSource(stream);
+    delayNode = audioCtx.createDelay();
+    delayNode.delayTime.value = 5; // 5 sec delay
+
+    source.connect(delayNode).connect(audioCtx.destination);
+}
+
+document.getElementById('stopBtn').onclick = () => {
+    if(audioCtx) {
+        audioCtx.close();
+        audioCtx = null;
+    }
+    if(stream) {
+        stream.getTracks().forEach(track => track.stop());
+        videoElem.srcObject = null;
+    }
+}
+</script>
+</body>
+</html>
